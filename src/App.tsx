@@ -1,26 +1,27 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container } from "react-bootstrap";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { NewNote } from "./NewNote";
+import { NewMemo } from "./NewMemo";
+import { MemoList } from "./MemoList";
 import { useLocalStorage } from "./useLocalStorage";
 import { useMemo } from "react";
 import { v4 as uuidV4 } from "uuid";
 
-type Note = {
+type Memo = {
   id: string;
-} & NoteData;
+} & MemoData;
 
-export type RawNote = {
+export type RawMemo = {
   id: string;
-} & RawNoteData;
+} & RawMemoData;
 
-export type RawNoteData = {
+export type RawMemoData = {
   title: string;
   markdown: string;
   tagIds: string[];
 };
 
-export type NoteData = {
+export type MemoData = {
   title: string;
   markdown: string;
   tags: Tag[];
@@ -32,22 +33,22 @@ export type Tag = {
 };
 
 function App() {
-  const [notes, setNotes] = useLocalStorage<RawNote[]>("NOTES", []);
+  const [Memos, setMemos] = useLocalStorage<RawMemo[]>("MEMOS", []);
   const [tags, setTags] = useLocalStorage<Tag[]>("TAGS", []);
 
-  const notesWithTags = useMemo(() => {
-    return notes.map((note) => {
+  const MemosWithTags = useMemo(() => {
+    return Memos.map((Memo) => {
       return {
-        ...note,
-        tags: tags.filter((tag) => note.tagIds.includes(tag.id)),
+        ...Memo,
+        tags: tags.filter((tag) => Memo.tagIds.includes(tag.id)),
       };
     });
-  }, [notes, tags]);
+  }, [Memos, tags]);
 
-  function onCreateNote({ tags, ...data }: NoteData) {
-    setNotes((prevNotes) => {
+  function onCreateMemo({ tags, ...data }: MemoData) {
+    setMemos((prevMemos) => {
       return [
-        ...prevNotes,
+        ...prevMemos,
         { ...data, id: uuidV4(), tagIds: tags.map((tag) => tag.id) },
       ];
     });
@@ -60,12 +61,15 @@ function App() {
   return (
     <Container className="my-4">
       <Routes>
-        <Route path="/" element={<h1>Home</h1>}></Route>
+        <Route
+          path="/"
+          element={<MemoList availableTags={tags} Memos={MemosWithTags} />}
+        ></Route>
         <Route
           path="/new"
           element={
-            <NewNote
-              onSubmit={onCreateNote}
+            <NewMemo
+              onSubmit={onCreateMemo}
               onAddTag={addTag}
               availableTags={tags}
             />

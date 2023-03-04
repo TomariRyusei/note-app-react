@@ -1,24 +1,25 @@
 import { FormEvent, useRef, useState } from "react";
 import { Button, Col, Form, Row, Stack } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CreatableReactSelect from "react-select/creatable";
-import { NoteData, Tag } from "./App";
+import { MemoData, Tag } from "./App";
 import { v4 as uuidV4 } from "uuid";
 
-type NoteFormProps = {
-  onSubmit: (data: NoteData) => void;
+type MemoFormProps = {
+  onSubmit: (data: MemoData) => void;
   onAddTag: (tag: Tag) => void;
-  availableTags: Tag[];
+  availableTags: Tag[]; // セレクトのオプションに設定するタグ(現在保存されているタグ)
 };
 
-export const NoteForm = ({
+export const MemoForm = ({
   onSubmit,
   onAddTag,
   availableTags,
-}: NoteFormProps) => {
+}: MemoFormProps) => {
   const titleRef = useRef<HTMLInputElement>(null);
   const markdownRef = useRef<HTMLTextAreaElement>(null);
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const navigate = useNavigate();
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -26,8 +27,10 @@ export const NoteForm = ({
     onSubmit({
       title: titleRef.current!.value,
       markdown: markdownRef.current!.value,
-      tags: [],
+      tags: selectedTags,
     });
+
+    navigate("..");
   }
 
   return (
@@ -36,25 +39,29 @@ export const NoteForm = ({
         <Row>
           <Col>
             <Form.Group controlId="title">
-              <Form.Label>Title</Form.Label>
+              <Form.Label>タイトル</Form.Label>
               <Form.Control ref={titleRef} required></Form.Control>
             </Form.Group>
           </Col>
           <Col>
             <Form.Group controlId="Tags">
-              <Form.Label>Tags</Form.Label>
+              <Form.Label>タグ</Form.Label>
               <CreatableReactSelect
+                // タグ作成時のアクション
                 onCreateOption={(label) => {
                   const newTag = { id: uuidV4(), label };
                   onAddTag(newTag);
                   setSelectedTags((prev) => [...prev, newTag]);
                 }}
+                //セレクトのオプション(現在保存されているタグ)
                 options={availableTags.map((tag) => {
                   return { label: tag.label, value: tag.id };
                 })}
+                // 現在選択されているタグ
                 value={selectedTags.map((tag) => {
                   return { label: tag.label, value: tag.id };
                 })}
+                // タグを選択
                 onChange={(tags) => {
                   setSelectedTags(
                     tags.map((tag) => {
@@ -68,7 +75,7 @@ export const NoteForm = ({
           </Col>
         </Row>
         <Form.Group controlId="Markdown">
-          <Form.Label>Body</Form.Label>
+          <Form.Label>本文</Form.Label>
           <Form.Control
             ref={markdownRef}
             required
@@ -78,11 +85,11 @@ export const NoteForm = ({
         </Form.Group>
         <Stack direction="horizontal" gap={2} className="justify-content-end">
           <Button type="submit" variant="primary">
-            Save
+            保存
           </Button>
           <Link to="..">
             <Button type="button" variant="outline-secondary">
-              Cancel
+              キャンセル
             </Button>
           </Link>
         </Stack>

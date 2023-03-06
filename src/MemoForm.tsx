@@ -9,16 +9,19 @@ type MemoFormProps = {
   onSubmit: (data: MemoData) => void;
   onAddTag: (tag: Tag) => void;
   availableTags: Tag[]; // セレクトのオプションに設定するタグ(現在保存されているタグ)
-};
+} & MemoData;
 
 export const MemoForm = ({
   onSubmit,
   onAddTag,
   availableTags,
+  title = "",
+  markdown = "",
+  tags = [],
 }: MemoFormProps) => {
   const titleRef = useRef<HTMLInputElement>(null);
   const markdownRef = useRef<HTMLTextAreaElement>(null);
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(tags);
   const navigate = useNavigate();
 
   function handleSubmit(e: FormEvent) {
@@ -40,7 +43,11 @@ export const MemoForm = ({
           <Col>
             <Form.Group controlId="title">
               <Form.Label>タイトル</Form.Label>
-              <Form.Control ref={titleRef} required></Form.Control>
+              <Form.Control
+                ref={titleRef}
+                required
+                defaultValue={title}
+              ></Form.Control>
             </Form.Group>
           </Col>
           <Col>
@@ -81,6 +88,7 @@ export const MemoForm = ({
             required
             as="textarea"
             rows={15}
+            defaultValue={markdown}
           ></Form.Control>
         </Form.Group>
         <Stack direction="horizontal" gap={2} className="justify-content-end">

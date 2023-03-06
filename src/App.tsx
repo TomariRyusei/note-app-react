@@ -6,8 +6,11 @@ import { MemoList } from "./MemoList";
 import { useLocalStorage } from "./useLocalStorage";
 import { useMemo } from "react";
 import { v4 as uuidV4 } from "uuid";
+import { MemoLayout } from "./MemoLayout";
+import { Memo } from "./Memo";
+import { EditMemo } from "./EditMemo";
 
-type Memo = {
+export type Memo = {
   id: string;
 } & MemoData;
 
@@ -54,6 +57,24 @@ function App() {
     });
   }
 
+  function onUpdateMemo(id: string, { tags, ...data }: MemoData) {
+    setMemos((prevMemos) => {
+      return prevMemos.map((memo) => {
+        if (memo.id === id) {
+          return { ...memo, ...data, tagIds: tags.map((tag) => tag.id) };
+        } else {
+          return memo;
+        }
+      });
+    });
+  }
+
+  function onDeleteNote(id: string) {
+    setMemos((prevMemos) => {
+      return prevMemos.filter((memo) => memo.id !== id);
+    });
+  }
+
   function addTag(tag: Tag) {
     setTags((prev) => [...prev, tag]);
   }
@@ -75,9 +96,18 @@ function App() {
             />
           }
         ></Route>
-        <Route path="/:id">
-          <Route index element={<h1>Show</h1>}></Route>
-          <Route path="edit" element={<h1>Edit</h1>}></Route>
+        <Route path="/:id" element={<MemoLayout memos={MemosWithTags} />}>
+          <Route index element={<Memo onDelete={onDeleteNote} />}></Route>
+          <Route
+            path="edit"
+            element={
+              <EditMemo
+                onSubmit={onUpdateMemo}
+                onAddTag={addTag}
+                availableTags={tags}
+              />
+            }
+          ></Route>
         </Route>
         <Route path="*" element={<Navigate to="/" />}></Route>
       </Routes>

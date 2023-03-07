@@ -1,18 +1,10 @@
-import {
-  Badge,
-  Button,
-  Card,
-  Col,
-  Form,
-  Modal,
-  Row,
-  Stack,
-} from "react-bootstrap";
+import { Badge, Button, Card, Col, Form, Row, Stack } from "react-bootstrap";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import ReactSelect from "react-select";
 import { Tag } from "./App";
 import { MemoCard } from "./MemoCard";
+import { EditTagsModal } from "./EditTagsModal";
 
 // 一覧に必要な情報のみに絞ったMemo
 export type SimplifiedMemo = {
@@ -24,11 +16,19 @@ export type SimplifiedMemo = {
 type MemoListProps = {
   availableTags: Tag[];
   Memos: SimplifiedMemo[];
+  onUpdateTag: (id: string, newLabel: string) => void;
+  onDeleteTag: (id: string) => void;
 };
 
-export const MemoList = ({ availableTags, Memos }: MemoListProps) => {
+export const MemoList = ({
+  availableTags,
+  Memos,
+  onUpdateTag,
+  onDeleteTag,
+}: MemoListProps) => {
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [title, setTitle] = useState("");
+  const [editTagsModalIsOpen, setEditTagsModalIsOpen] = useState(false);
 
   // メモ検索処理
   const filteredMemos = useMemo(() => {
@@ -55,7 +55,11 @@ export const MemoList = ({ availableTags, Memos }: MemoListProps) => {
             <Link to="/new">
               <Button variant="primary">メモを作成</Button>
             </Link>
-            <Button variant="outline-secondary" type="button">
+            <Button
+              variant="outline-secondary"
+              type="button"
+              onClick={() => setEditTagsModalIsOpen(true)}
+            >
               タグを編集
             </Button>
           </Stack>
@@ -103,6 +107,13 @@ export const MemoList = ({ availableTags, Memos }: MemoListProps) => {
           </Col>
         ))}
       </Row>
+      <EditTagsModal
+        onUpdateTag={onUpdateTag}
+        onDeleteTag={onDeleteTag}
+        show={editTagsModalIsOpen}
+        availableTags={availableTags}
+        handleClose={() => setEditTagsModalIsOpen(false)}
+      />
     </>
   );
 };

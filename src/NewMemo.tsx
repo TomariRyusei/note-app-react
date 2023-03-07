@@ -19,6 +19,9 @@ export const NewMemo = ({
         onSubmit={onSubmit}
         onAddTag={onAddTag}
         availableTags={availableTags}
+        title={""}
+        markdown={""}
+        tags={[]}
       />
     </>
   );

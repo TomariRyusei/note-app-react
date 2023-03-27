@@ -36,17 +36,18 @@ export type Tag = {
 };
 
 function App() {
-  const [Memos, setMemos] = useLocalStorage<RawMemo[]>("MEMOS", []);
+  const [memos, setMemos] = useLocalStorage<RawMemo[]>("MEMOS", []);
   const [tags, setTags] = useLocalStorage<Tag[]>("TAGS", []);
 
-  const MemosWithTags = useMemo(() => {
-    return Memos.map((Memo) => {
+  // タグとメモの紐付け
+  const memosWithTags = useMemo(() => {
+    return memos.map((Memo) => {
       return {
         ...Memo,
         tags: tags.filter((tag) => Memo.tagIds.includes(tag.id)),
       };
     });
-  }, [Memos, tags]);
+  }, [memos, tags]);
 
   function onCreateMemo({ tags, ...data }: MemoData) {
     setMemos((prevMemos) => {
@@ -105,7 +106,7 @@ function App() {
           element={
             <MemoList
               availableTags={tags}
-              Memos={MemosWithTags}
+              Memos={memosWithTags}
               onUpdateTag={updateTag}
               onDeleteTag={deleteTag}
             />
@@ -121,7 +122,7 @@ function App() {
             />
           }
         ></Route>
-        <Route path="/:id" element={<MemoLayout memos={MemosWithTags} />}>
+        <Route path="/:id" element={<MemoLayout memos={memosWithTags} />}>
           <Route index element={<Memo onDelete={onDeleteNote} />}></Route>
           <Route
             path="edit"
